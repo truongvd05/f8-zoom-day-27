@@ -58,12 +58,30 @@ list.onmousedown = function (event) {
 
     const rect = item.getBoundingClientRect();
     start = rect.left;
+    item.style.transition = ``;
 
     isToching = true;
     startX = event.clientX;
     startLeft = item.offsetLeft;
     list.style.cursor = "grabbing";
 };
+
+list.addEventListener("touchstart", function (e) {
+    e.preventDefault();
+    const touch = e.touches[0]; // Lấy điểm chạm đầu tiên
+
+    const simulatedEvent = new MouseEvent("mousedown", {
+        bubbles: true,
+        cancelable: true,
+        clientX: touch.clientX, // vị trí X như chuột
+        clientY: touch.clientY,
+    });
+    const item = e.target.closest(".item");
+    if (item) {
+        item.dispatchEvent(simulatedEvent);
+    }
+});
+
 body.onmouseup = function (event) {
     isToching = false;
     const item = event.target.closest(".item");
@@ -73,13 +91,40 @@ body.onmouseup = function (event) {
         const rect = item.getBoundingClientRect();
         final = rect.left;
         const defaultItem = Math.abs(final - start);
-        if (start > final + 80 || start < final - 80) {
+        if (start > final + 100 || start < final - 100) {
             item.classList.add("hidden");
         } else {
+            item.style.transition = `left 0.4s linear`;
             item.style.left = `${startLeft}px`;
         }
     }
 };
+
+document.addEventListener("touchend", function (e) {
+    const touch = e.changedTouches[0];
+
+    const simulatedEvent = new MouseEvent("mouseup", {
+        bubbles: true,
+        cancelable: true,
+        clientX: touch.clientX,
+        clientY: touch.clientY,
+    });
+
+    // Dispatch sự kiện mouseup đến phần tử được chạm
+    e.target.dispatchEvent(simulatedEvent);
+});
+
+list.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+
+    const simulated = new MouseEvent("mousedown", {
+        bubbles: true,
+        cancelable: true,
+        clientX: e.touches[0].clientX,
+    });
+
+    e.target.dispatchEvent(simulated);
+});
 
 list.onmousemove = function (event) {
     const item = event.target.closest(".item");
@@ -90,6 +135,24 @@ list.onmousemove = function (event) {
         item.style.left = `${startLeft + dx}px`;
     }
 };
+
+document.addEventListener("touchmove", function (e) {
+    if (!isToching || e.touches.length === 0) return;
+
+    const touch = e.touches[0];
+
+    const simulatedEvent = new MouseEvent("mousemove", {
+        bubbles: true,
+        cancelable: true,
+        clientX: touch.clientX,
+        clientY: touch.clientY,
+    });
+
+    const item = e.target.closest(".item");
+    if (item) {
+        item.dispatchEvent(simulatedEvent);
+    }
+});
 
 function render() {
     players.forEach((player) => {

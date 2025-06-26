@@ -18,8 +18,9 @@ body {
     background-repeat: no-repeat;
     background-position: center;
     color: azure;
-    
-    transition: opacity 0.4s linear;
+    visibility: visible;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+
 }
 
 p {
