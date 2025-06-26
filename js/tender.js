@@ -66,21 +66,15 @@ list.onmousedown = function (event) {
     list.style.cursor = "grabbing";
 };
 
-list.addEventListener("touchstart", function (e) {
-    e.preventDefault();
-    const touch = e.touches[0]; // Lấy điểm chạm đầu tiên
+list.onmousemove = function (event) {
+    const item = event.target.closest(".item");
 
-    const simulatedEvent = new MouseEvent("mousedown", {
-        bubbles: true,
-        cancelable: true,
-        clientX: touch.clientX, // vị trí X như chuột
-        clientY: touch.clientY,
-    });
-    const item = e.target.closest(".item");
-    if (item) {
-        item.dispatchEvent(simulatedEvent);
+    // lấy vị trí ban đầu của phần element
+    const dx = event.clientX - startX;
+    if (isToching) {
+        item.style.left = `${startLeft + dx}px`;
     }
-});
+};
 
 body.onmouseup = function (event) {
     isToching = false;
@@ -100,6 +94,43 @@ body.onmouseup = function (event) {
     }
 };
 
+// dispatch event for mobile
+
+list.addEventListener("touchstart", function (e) {
+    e.preventDefault();
+    const touch = e.touches[0]; // Lấy điểm chạm đầu tiên
+
+    const simulatedEvent = new MouseEvent("mousedown", {
+        bubbles: true,
+        cancelable: true,
+        clientX: touch.clientX, // vị trí X như chuột
+    });
+    const item = e.target.closest(".item");
+    if (item) {
+        item.dispatchEvent(simulatedEvent);
+    }
+});
+
+// dispatch event for mobile
+document.addEventListener("touchmove", function (e) {
+    if (!isToching || e.touches.length === 0) return;
+
+    const touch = e.touches[0];
+
+    const simulatedEvent = new MouseEvent("mousemove", {
+        bubbles: true,
+        cancelable: true,
+        clientX: touch.clientX,
+    });
+
+    const item = e.target.closest(".item");
+    if (item) {
+        item.dispatchEvent(simulatedEvent);
+    }
+});
+
+// dispatch event for mobile
+
 document.addEventListener("touchend", function (e) {
     const touch = e.changedTouches[0];
 
@@ -112,46 +143,6 @@ document.addEventListener("touchend", function (e) {
 
     // Dispatch sự kiện mouseup đến phần tử được chạm
     e.target.dispatchEvent(simulatedEvent);
-});
-
-list.addEventListener("touchstart", (e) => {
-    e.preventDefault();
-
-    const simulated = new MouseEvent("mousedown", {
-        bubbles: true,
-        cancelable: true,
-        clientX: e.touches[0].clientX,
-    });
-
-    e.target.dispatchEvent(simulated);
-});
-
-list.onmousemove = function (event) {
-    const item = event.target.closest(".item");
-
-    // lấy vị trí ban đầu của phần element
-    const dx = event.clientX - startX;
-    if (isToching) {
-        item.style.left = `${startLeft + dx}px`;
-    }
-};
-
-document.addEventListener("touchmove", function (e) {
-    if (!isToching || e.touches.length === 0) return;
-
-    const touch = e.touches[0];
-
-    const simulatedEvent = new MouseEvent("mousemove", {
-        bubbles: true,
-        cancelable: true,
-        clientX: touch.clientX,
-        clientY: touch.clientY,
-    });
-
-    const item = e.target.closest(".item");
-    if (item) {
-        item.dispatchEvent(simulatedEvent);
-    }
 });
 
 function render() {
